@@ -3,7 +3,7 @@
 int acceleration_of_gravity = -10;
 int hight = 30;
 int initial_y = 30;
-double y_position = initial_y;
+
 const double DELTA_T = 0.05;
 int initial_speed = 0;
 
@@ -25,11 +25,11 @@ void Enter()
 {
     while (Console.ReadKey().Key != ConsoleKey.Enter) { }
 }
-void Data()
+void Data(Object ball)
 {
     Console.WriteLine(
-        $""
-            + $"Hight: {Math.Round(y_position, 1)}\n"
+        $"Speed: {Math.Round(ball.Speed, 1)}\n"
+            + $"Hight: {Math.Round(ball.Y, 1)}\n"
             + $"E_kinetic: {Math.Round(e_kinetic, 1)}\n"
             + $"E_potential: {Math.Round(e_potential, 1)}\n"
             + $"Initial Hight: {initial_y}\n"
@@ -47,8 +47,8 @@ Object Physics(double delta_time, Object ball)
 {
     double additional_losses = 0.1 * ball.Mass;
     ball.Speed += acceleration_of_gravity * delta_time / 2;
-    y_position += ball.Speed * delta_time;
-    if (y_position <= 0 && ball.Speed < 0)
+    ball.Y += ball.Speed * delta_time;
+    if (ball.Y <= 0 && ball.Speed < 0)
     {
         e_kinetic = e_kinetic * losses - additional_losses;
         if (e_kinetic < 0)
@@ -56,9 +56,9 @@ Object Physics(double delta_time, Object ball)
             e_kinetic = 0;
         }
         ball.Speed = Math.Sqrt(2 * e_kinetic / ball.Mass);
-        y_position = 0;
+        ball.Y = 0;
     }
-    if (y_position >= hight && ball.Speed > 0)
+    if (ball.Y >= hight && ball.Speed > 0)
     {
         e_kinetic = e_kinetic * losses - additional_losses;
         if (e_kinetic < 0)
@@ -66,17 +66,17 @@ Object Physics(double delta_time, Object ball)
             e_kinetic = 0;
         }
         ball.Speed = -Math.Sqrt(2 * e_kinetic / ball.Mass);
-        y_position = hight;
+        ball.Y = hight;
     }
     e_kinetic = ball.Mass * Math.Pow(ball.Speed, 2) / 2;
-    e_potential = -(ball.Mass * acceleration_of_gravity * y_position);
+    e_potential = -(ball.Mass * acceleration_of_gravity * ball.Y);
     full_energy = e_kinetic + e_potential;
     timer++;
     return ball;
 }
-void Graphics()
+void Graphics(Object ball)
 {
-    scaled_y = scale * y_position;
+    scaled_y = scale * ball.Y;
     for (int i = 0; i < Array.Length; i++)
     {
         Array[i] = $"{i}";
@@ -98,8 +98,14 @@ void Graphics()
         Console.WriteLine(Array[Array.Length - i - 1]);
     }
 }
+
+var ball = new Object
+{
+    Mass = 1,
+    Speed = initial_speed,
+    Y = initial_y
+};
 Enter();
-var ball = new Object { Mass = 1, Speed = 0 };
 do
 {
     Update();
@@ -107,8 +113,8 @@ do
     {
         ball = Physics(DELTA_T / 5, ball);
     }
-    Data();
-    Graphics();
+    Data(ball);
+    Graphics(ball);
 } while (full_energy > 0);
 Enter();
 
@@ -116,4 +122,5 @@ struct Object
 {
     public int Mass;
     public double Speed;
+    public double Y;
 }
