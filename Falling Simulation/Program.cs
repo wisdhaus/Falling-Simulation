@@ -1,17 +1,17 @@
 ﻿Console.ForegroundColor = ConsoleColor.Cyan;
 int acceleration_of_gravity = -10;
-int hight = 10;
-int initial_y = 10;
+int hight = 30;
+int initial_y = 30;
 double y_position = initial_y;
 int mass = 1;
-double t = 0.05;
+const double DELTA_T = 0.05;
 int initial_speed = 0;
 double speed = initial_speed;
 double e_kinetic = 0;
 double e_potential = 0;
 double losses = 0.8;
-double full_energy;
-double scale = 3;
+double full_energy = 0;
+double scale = 1;
 double scaled_y;
 string[] Array = new string[Convert.ToInt16(Math.Round(scale * hight, 0)) + 1];
 string block = "\u2588";
@@ -41,10 +41,10 @@ void Update()
     Thread.Sleep(5);
     Console.Clear();
 }
-void Physics()
+void Physics(double delta_time)
 {
-    speed += acceleration_of_gravity * t / 2;
-    y_position += speed * t;
+    speed += acceleration_of_gravity * delta_time / 2;
+    y_position += speed * delta_time;
     if (y_position <= 0 && speed < 0)
     {
         e_kinetic = e_kinetic * losses - additional_losses;
@@ -98,7 +98,10 @@ Enter();
 do
 {
     Update();
-    Physics();
+    for (int i = 0; i < 5; i++)
+    {
+        Physics(DELTA_T / 5);
+    }
     Data();
     Graphics();
 } while (full_energy > 0);
